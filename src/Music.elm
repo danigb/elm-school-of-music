@@ -1,8 +1,13 @@
-module Music exposing ( PitchClass(..), Primitive(..), Music(..), Control(..),
-  note, rest, tempo, absPitch, pitch )
+module Music exposing (
+  PitchClass(..), Primitive(..), Music(..), Control(..),
+  note, rest, tempo,
+  absPitch, pitch, trans,
+  wts )
 
 {-|
 My attempt to port HSoM to elm
+
+CHAPTER 2
 
 2.1 Preliminaries
 
@@ -16,9 +21,13 @@ Octave, PitchClass, Pitch, Dur
 
 @docs note, rest, tempo
 
-# 2.4
+# 2.4 Absolute Pitches
 
-@docs absPitch, pitch
+@docs absPitch, pitch, trans
+
+CHAPTER 3: Polymorphic and Higher-Order Functions
+
+@docs wts
 
 -}
 
@@ -36,6 +45,9 @@ type PitchClass =
 
 type alias Pitch = (PitchClass, Octave)
 type alias Dur = Float
+
+qn : Dur
+qn = 1 / 4
 
 {-- 2.2 Notes, Music, and Polymorphism --}
 
@@ -108,6 +120,27 @@ returning a sharp in such ambiguous cases -}
 pitch : AbsPitch -> Pitch
 pitch ap =
   (pitchClass ap, octave ap)
+
+{-| Given pitch and absPitch, it is now easy to define a function trans that
+transposes pitches -}
+trans : Int -> Pitch -> Pitch
+trans i p =
+  pitch (absPitch p + i)
+
+
+{-
+  CHAPTER 3 Polymorphic and Higher-Order Functions
+  ================================================
+-}
+
+{-| For a musical example involving the use of map, consider the task of generating
+a six-note whole-tone scale starting at a given pitch -}
+wts : Pitch -> List (Music Pitch)
+wts p =
+  let
+    step n = note qn (pitch (absPitch p + n))
+  in
+    List.map step [0, 2, 4, 6, 8]
 
 
 {- NOTE: Those are at the end because they are too large. Any compact syntax? -}
