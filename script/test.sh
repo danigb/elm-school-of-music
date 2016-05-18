@@ -1,1 +1,1 @@
-elm-make tests/Tests.elm --output tests/run.js && node tests/run.js
+mkdir -p tmp && elm-make tests/Tests.elm --output tmp/run.js && node tmp/run.js
