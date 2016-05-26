@@ -1,5 +1,5 @@
 module Music exposing (
-  PitchClass(..), Primitive(..), Music(..), Control(..),
+  PitchClass(..), Primitive(..), Music(..), Control(..), Octave, Pitch, AbsPitch,
   note, rest, tempo,
   absPitch, pitch, trans,
   wts )
@@ -15,7 +15,7 @@ Octave, PitchClass, Pitch, Dur
 
 # 2.2 Notes, Music, and Polymorphism
 
-@docs PitchClass, Primitive, Music, Control
+@docs PitchClass, Primitive, Music, Control, Octave, Pitch, AbsPitch
 
 # 2.3 Convenient Auxiliary Functions
 
@@ -33,7 +33,7 @@ CHAPTER 3: Polymorphic and Higher-Order Functions
 
 
 {-- 2.1 Preliminaries --}
-
+{-| Octave -}
 type alias Octave = Int
 
 {-| PitchClass -}
@@ -43,6 +43,7 @@ type PitchClass =
    |  Gf | Fss | G | Aff | Gs | Af | Gss | A | Bff | As
    |  Bf | Ass | B | Bs | Bss
 
+{-| Pitch -}
 type alias Pitch = (PitchClass, Octave)
 type alias Dur = Float
 
@@ -90,6 +91,7 @@ uses a type synonym to define the concept of an “absolute pitch: -}
 
 {- NOTE: I would prefer to use a Float -}
 
+{-| Absolute Pitch -}
 type alias AbsPitch = Int
 
 {-| The absolute pitch of a Pitch -}
