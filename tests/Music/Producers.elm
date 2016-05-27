@@ -19,15 +19,22 @@ pitchClass =
      f i = Array.get i pitchClasses
              |> withDefault C
    in
-     rangeInt 0 34
+     rangeInt 0 (Array.length pitchClasses - 1)
        |> Check.Producer.map f
 
 octave : Producer Octave
 octave =
    rangeInt 0 8
 
+interval : Producer Int
+interval =
+   rangeInt 0 11
+
 pitches : Producer Pitch
 pitches = Check.Producer.tuple (pitchClass, octave)
+
+pitchWithInterval : Producer (Pitch, Int)
+pitchWithInterval = Check.Producer.tuple (pitches, interval)
 
 
 

@@ -32,10 +32,21 @@ claim_pitch_inverse_of_abspitch =
   `for`
     pitches
 
+claim_transposition_is_invertible =
+  claim
+    "transposition up and down leaves the original pitch unchanged"
+  `that`
+    (\(p,i) -> absPitch (trans -i (trans i p)))
+  `is`
+    (\(p,i) -> enharmonicEquivalence p)
+  `for`
+    pitchWithInterval
+
 suite_music =
   suite "Music Suite"
     [ claim_abspitch_inverse_of_pitch
     , claim_pitch_inverse_of_abspitch
+    , claim_transposition_is_invertible
     ]
 
 evidence : Evidence
