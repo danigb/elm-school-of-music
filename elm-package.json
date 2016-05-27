@@ -4,13 +4,15 @@
     "repository": "https://github.com/user/project.git",
     "license": "BSD3",
     "source-directories": [
-        "src/"
+        "src/",
+        "tests/"
     ],
     "exposed-modules": [
       "Music"
     ],
     "dependencies": {
         "elm-community/elm-test": "1.1.0 <= v < 2.0.0",
+        "elm-community/elm-check": "1.0.1 <= v < 2.0.0",
         "elm-lang/core": "4.0.0 <= v < 5.0.0"
     },
     "elm-version": "0.17.0 <= v < 0.18.0"
