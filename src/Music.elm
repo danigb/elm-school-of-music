@@ -100,7 +100,7 @@ absPitch (pc, o) =
   12 * o + pcToInt pc
 
 
-chromatic = [C, Df, D, Ef, E, F, Gf, G, Af, A, Bf, B]
+chromatic = [C, Cs, D, Ds, E, F, Fs, G, Gs, A, As, B]
 {- NOTE: this is a hack. I don't want to return a Maybe... since ap % 2,
   I know positively it can't return Nothing -}
 {-| Get the pitch class of an absolute pitch -}

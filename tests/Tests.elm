@@ -29,13 +29,13 @@ music =
       test "absPitch" (assertEqual 48 (absPitch (C, 4))),
       test "abs pitches" (assertEqual [48,50,52,53,55]
         (List.map absPitch [(C, 4), (D, 4), (E, 4), (F, 4), (G, 4)])),
-      test "pitch" (assertEqual (Df, 4) (pitch 49)),
+      test "pitch" (assertEqual (Cs, 4) (pitch 49)),
       test "pitch 0 is C0" (assertEqual (C, 0) (pitch 0)),
-      test "negative pitch" (assertEqual (Bf, -1) (pitch -2)),
+      test "negative pitch" (assertEqual (As, -1) (pitch -2)),
       test "trans" (assertEqual (F, 4) (trans 5 (C, 4))),
-      test "whole tone scale" (assertEqual (wts (A, 4))
-        [Prim (Note 0.25 (A,4)),Prim (Note 0.25 (B,4)),Prim (Note 0.25 (Df,5)),
-         Prim (Note 0.25 (Ef,5)),Prim (Note 0.25 (F,5))])
+      test "whole tone scale" (assertEqual 
+        [Prim (Note 0.25 (A,4)),Prim (Note 0.25 (B,4)),Prim (Note 0.25 (Cs,5)),
+         Prim (Note 0.25 (Ds,5)),Prim (Note 0.25 (F,5))]  (wts (A, 4)) )
     ]
 
 main =
