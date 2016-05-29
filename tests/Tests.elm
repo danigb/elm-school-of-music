@@ -3,6 +3,10 @@ import Music exposing (..)
 import String
 
 
+import Ratio exposing (Rational, over, fromInt)
+
+
+
 tests : Test
 tests =
     suite "A Test Suite"
@@ -16,16 +20,16 @@ music : Test
 music =
   suite "Music"
     [
-      test "Rest" (assertEqual (Rest 3) (Rest 3) ),
-      test "Note" (assertEqual (Note 3 (C, 4)) (Note 3 (C, 4))),
-      test "Prim Rest" (assertEqual (Prim (Rest 3))
-        (Prim (Rest 3))),
-      test "Prim Note" (assertEqual (Prim (Note 4 (C, 5)))
-        (Prim (Note 4 (C, 5)))),
-      test "note" (assertEqual (note 3 C) (Prim (Note 3 C))),
-      test "rest" (assertEqual (rest 1) (Prim (Rest 1))),
-      test "tempo" (assertEqual (tempo 4 (note 3 C))
-        (Modify (Tempo 4) (Prim (Note 3 C)))),
+      test "Rest" (assertEqual (Rest (fromInt 3)) (Rest (fromInt 3)) ),
+      test "Note" (assertEqual (Note (fromInt 3) (C, 4)) (Note (fromInt 3) (C, 4))),
+      test "Prim Rest" (assertEqual (Prim (Rest (3 `over` 4)))
+        (Prim (Rest (3 `over` 4)))),
+      test "Prim Note" (assertEqual (Prim (Note (fromInt 4) (C, 5)))
+        (Prim (Note (fromInt 4) (C, 5)))),
+      test "note" (assertEqual (note (fromInt 3) C) (Prim (Note (fromInt 3) C))),
+      test "rest" (assertEqual (rest (fromInt 1)) (Prim (Rest (fromInt 1)))),
+      test "tempo" (assertEqual (tempo (fromInt 4) (note (fromInt 3) C))
+        (Modify (Tempo (fromInt 4)) (Prim (Note (fromInt 3) C)))),
       test "absPitch" (assertEqual 48 (absPitch (C, 4))),
       test "abs pitches" (assertEqual [48,50,52,53,55]
         (List.map absPitch [(C, 4), (D, 4), (E, 4), (F, 4), (G, 4)])),
@@ -34,8 +38,8 @@ music =
       test "negative pitch" (assertEqual (As, -1) (pitch -2)),
       test "trans" (assertEqual (F, 4) (trans 5 (C, 4))),
       test "whole tone scale" (assertEqual 
-        [Prim (Note 0.25 (A,4)),Prim (Note 0.25 (B,4)),Prim (Note 0.25 (Cs,5)),
-         Prim (Note 0.25 (Ds,5)),Prim (Note 0.25 (F,5))]  (wts (A, 4)) )
+        [Prim (Note (1 `over` 4) (A,4)),Prim (Note (1 `over` 4) (B,4)),Prim (Note (1 `over` 4) (Cs,5)),
+         Prim (Note (1 `over` 4) (Ds,5)),Prim (Note (1 `over` 4) (F,5))]  (wts (A, 4)) )
     ]
 
 main =

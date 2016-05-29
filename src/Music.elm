@@ -31,6 +31,8 @@ CHAPTER 3: Polymorphic and Higher-Order Functions
 
 -}
 
+import Ratio exposing (Rational, over, fromInt, divide)
+
 
 {-- 2.1 Preliminaries --}
 {-| Octave -}
@@ -45,10 +47,11 @@ type PitchClass =
 
 {-| Pitch -}
 type alias Pitch = (PitchClass, Octave)
-type alias Dur = Float
+
+type alias Dur = Rational
 
 qn : Dur
-qn = 1 / 4
+qn = over 1 4
 
 {-- 2.2 Notes, Music, and Polymorphism --}
 
@@ -65,7 +68,7 @@ type Music a =
   | Modify Control (Music a)
 
 {-| Control -}
-type Control = Tempo Float
+type Control = Tempo Rational
 
 {-- 2.3 Convenient Auxiliary Functions --}
 
@@ -103,6 +106,7 @@ absPitch (pc, o) =
 chromatic = [C, Cs, D, Ds, E, F, Fs, G, Gs, A, As, B]
 {- NOTE: this is a hack. I don't want to return a Maybe... since ap % 2,
   I know positively it can't return Nothing -}
+
 {-| Get the pitch class of an absolute pitch -}
 pitchClass : AbsPitch -> PitchClass
 pitchClass ap =

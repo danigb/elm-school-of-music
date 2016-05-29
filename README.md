@@ -10,3 +10,8 @@ To run the tests, clone this repo and:
 ```bash
 ./script/test.sh
 ```
+followed by:
+
+```bash
+./script/check.sh
+```
