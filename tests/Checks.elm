@@ -11,6 +11,7 @@ enharmonicEquivalence : Pitch -> AbsPitch
 enharmonicEquivalence =
   absPitch
 
+-- Tests for Music
 
 claim_abspitch_inverse_of_pitch =
   claim
@@ -42,11 +43,22 @@ claim_transposition_is_invertible =
   `for`
     pitchWithInterval
 
+claim_transposition_composes =
+  claim
+    "transposition composes"
+  `that`
+    (\(p,i,j) -> absPitch (trans i (trans j p)))
+  `is`
+    (\(p,i,j) -> absPitch (trans (i + j) p))
+  `for`
+    pitchWithTwoIntervals
+
 suite_music =
   suite "Music Suite"
     [ claim_abspitch_inverse_of_pitch
     , claim_pitch_inverse_of_abspitch
     , claim_transposition_is_invertible
+    , claim_transposition_composes
     ]
 
 evidence : Evidence

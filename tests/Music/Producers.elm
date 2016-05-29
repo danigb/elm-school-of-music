@@ -28,13 +28,16 @@ octave =
 
 interval : Producer Int
 interval =
-   rangeInt 0 11
+   rangeInt -11 11
 
 pitches : Producer Pitch
 pitches = Check.Producer.tuple (pitchClass, octave)
 
 pitchWithInterval : Producer (Pitch, Int)
 pitchWithInterval = Check.Producer.tuple (pitches, interval)
+
+pitchWithTwoIntervals : Producer (Pitch, Int, Int)
+pitchWithTwoIntervals = Check.Producer.tuple3 (pitches, interval, interval)
 
 
 

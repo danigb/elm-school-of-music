@@ -68,7 +68,99 @@ type Music a =
   | Modify Control (Music a)
 
 {-| Control -}
-type Control = Tempo Rational
+type Control = 
+    Tempo Rational                  -- scale the tempo
+  | Transpose AbsPitch              -- transposition
+  | Instrument InstrumentName       -- instrument label
+  | Phrase (List PhraseAttribute)   -- phrase attributes
+  | Player PlayerName               -- player label
+  | KeySig PitchClass Mode          -- key signature and mode
+
+type alias PlayerName  = String
+
+type Mode = 
+    Major 
+  | Minor
+
+type InstrumentName =
+     AcousticGrandPiano     | BrightAcousticPiano    | ElectricGrandPiano
+  |  HonkyTonkPiano         | RhodesPiano            | ChorusedPiano
+  |  Harpsichord            | Clavinet               | Celesta 
+  |  Glockenspiel           | MusicBox               | Vibraphone  
+  |  Marimba                | Xylophone              | TubularBells
+  |  Dulcimer               | HammondOrgan           | PercussiveOrgan 
+  |  RockOrgan              | ChurchOrgan            | ReedOrgan
+  |  Accordion              | Harmonica              | TangoAccordion
+  |  AcousticGuitarNylon    | AcousticGuitarSteel    | ElectricGuitarJazz
+  |  ElectricGuitarClean    | ElectricGuitarMuted    | OverdrivenGuitar
+  |  DistortionGuitar       | GuitarHarmonics        | AcousticBass
+  |  ElectricBassFingered   | ElectricBassPicked     | FretlessBass
+  |  SlapBass1              | SlapBass2              | SynthBass1   
+  |  SynthBass2             | Violin                 | Viola  
+  |  Cello                  | Contrabass             | TremoloStrings
+  |  PizzicatoStrings       | OrchestralHarp         | Timpani
+  |  StringEnsemble1        | StringEnsemble2        | SynthStrings1
+  |  SynthStrings2          | ChoirAahs              | VoiceOohs
+  |  SynthVoice             | OrchestraHit           | Trumpet
+  |  Trombone               | Tuba                   | MutedTrumpet
+  |  FrenchHorn             | BrassSection           | SynthBrass1
+  |  SynthBrass2            | SopranoSax             | AltoSax 
+  |  TenorSax               | BaritoneSax            | Oboe  
+  |  Bassoon                | EnglishHorn            | Clarinet
+  |  Piccolo                | Flute                  | Recorder
+  |  PanFlute               | BlownBottle            | Shakuhachi
+  |  Whistle                | Ocarina                | Lead1Square
+  |  Lead2Sawtooth          | Lead3Calliope          | Lead4Chiff
+  |  Lead5Charang           | Lead6Voice             | Lead7Fifths
+  |  Lead8BassLead          | Pad1NewAge             | Pad2Warm
+  |  Pad3Polysynth          | Pad4Choir              | Pad5Bowed
+  |  Pad6Metallic           | Pad7Halo               | Pad8Sweep
+  |  FX1Train               | FX2Soundtrack          | FX3Crystal
+  |  FX4Atmosphere          | FX5Brightness          | FX6Goblins
+  |  FX7Echoes              | FX8SciFi               | Sitar
+  |  Banjo                  | Shamisen               | Koto
+  |  Kalimba                | Bagpipe                | Fiddle 
+  |  Shanai                 | TinkleBell             | Agogo  
+  |  SteelDrums             | Woodblock              | TaikoDrum
+  |  MelodicDrum            | SynthDrum              | ReverseCymbal
+  |  GuitarFretNoise        | BreathNoise            | Seashore
+  |  BirdTweet              | TelephoneRing          | Helicopter
+  |  Applause               | Gunshot                | Percussion
+  |  Custom String
+
+type PhraseAttribute = 
+    Dyn Dynamic
+  | Tmp Tempo
+  | Art Articulation
+  | Orn Ornament
+
+type Dynamic =  
+    Accent Rational | Crescendo Rational | Diminuendo Rational
+  | StdLoudness StdLoudness | Loudness Rational
+
+type StdLoudness = 
+  PPP | PP | P | MP | SF | MF | NF | FF | FFF
+
+type Tempo =
+   Ritardando Rational 
+ | Accelerando Rational
+
+type Articulation =  
+    Staccato Rational | Legato Rational | Slurred Rational
+  | Tenuto | Marcato | Pedal | Fermata | FermataDown | Breath
+  | DownBow | UpBow | Harmonic | Pizzicato | LeftPizz
+  | BartokPizz | Swell | Wedge | Thumb | Stopped
+
+type Ornament =
+    Trill | Mordent | InvMordent | DoubleMordent
+  | Turn | TrilledTurn | ShortTrill
+  | Arpeggio | ArpeggioUp | ArpeggioDown
+  | Instruction String | Head NoteHead
+  | DiatonicTrans Int
+
+type NoteHead =  
+    DiamondHead | SquareHead | XHead | TriangleHead
+  | TremoloHead | SlashHead | ArtHarmonic | NoHead
 
 {-- 2.3 Convenient Auxiliary Functions --}
 
@@ -86,6 +178,139 @@ rest d =
 tempo : Dur -> Music a -> Music a
 tempo r m =
   Modify (Tempo r) m
+
+{-| transpose -}
+transpose : AbsPitch -> Music a -> Music a
+transpose i m = 
+  Modify (Transpose i) m
+
+{-| instrument -}
+instrument : InstrumentName -> Music a -> Music a
+instrument i m  = 
+  Modify (Instrument i) m
+
+{-| phrase -}
+phrase : List PhraseAttribute -> Music a -> Music a
+phrase pa m = 
+  Modify (Phrase pa) m
+
+{-| player -}
+player : PlayerName -> Music a -> Music a
+player pn m = 
+  Modify (Player pn) m
+
+{-| key signaure -}
+keysig : PitchClass -> Mode -> Music a -> Music a
+keysig pc mo m = 
+  Modify (KeySig pc mo) m
+
+{- shorthand for notes
+  Note: elm doesn't allow the haskell-like shorthand:
+
+  cff,cf : Octave -> Dur -> Music Pitch
+-}
+cff : Octave -> Dur -> Music Pitch
+cff o d = note d (Cff,  o)
+
+cf : Octave -> Dur -> Music Pitch
+cf o d = note d (Cf,  o)
+
+c : Octave -> Dur -> Music Pitch
+c o d = note d (C,  o)
+
+cs : Octave -> Dur -> Music Pitch
+cs o d = note d (Cs,  o)
+
+css : Octave -> Dur -> Music Pitch
+css o d = note d (Css,  o)
+
+dff : Octave -> Dur -> Music Pitch
+dff o d = note d (Dff,  o)
+
+df : Octave -> Dur -> Music Pitch
+df o d = note d (Df,  o)
+
+d : Octave -> Dur -> Music Pitch
+d o d = note d (D,  o)
+
+ds : Octave -> Dur -> Music Pitch
+ds o d = note d (Ds,  o)
+
+dss : Octave -> Dur -> Music Pitch
+dss o d = note d (Dss,  o)
+
+eff : Octave -> Dur -> Music Pitch
+eff o d = note d (Eff,  o)
+
+ef : Octave -> Dur -> Music Pitch
+ef o d = note d (Ef,  o)
+
+e : Octave -> Dur -> Music Pitch
+e o d = note d (E,  o)
+
+es : Octave -> Dur -> Music Pitch
+es o d = note d (Es,  o)
+
+ess : Octave -> Dur -> Music Pitch
+ess o d = note d (Ess,  o)
+
+fff : Octave -> Dur -> Music Pitch
+fff o d = note d (Fff,  o)
+
+ff : Octave -> Dur -> Music Pitch
+ff o d = note d (Ff,  o)
+
+f : Octave -> Dur -> Music Pitch
+f o d = note d (F,  o)
+
+fs : Octave -> Dur -> Music Pitch
+fs o d = note d (Fs,  o)
+
+fss : Octave -> Dur -> Music Pitch
+fss o d = note d (Fss,  o)
+
+gff : Octave -> Dur -> Music Pitch
+gff o d = note d (Gff,  o)
+
+gf : Octave -> Dur -> Music Pitch
+gf o d = note d (Gf,  o)
+
+g : Octave -> Dur -> Music Pitch
+g o d = note d (G,  o)
+
+gs : Octave -> Dur -> Music Pitch
+gs o d = note d (Gs,  o)
+
+gss : Octave -> Dur -> Music Pitch
+gss o d = note d (Ass,  o)
+
+af : Octave -> Dur -> Music Pitch
+af o d = note d (Af,  o)
+
+a : Octave -> Dur -> Music Pitch
+a o d = note d (A,  o)
+
+{- note - haskell allows as but for us it's a reserved word -}
+ash : Octave -> Dur -> Music Pitch
+ash o d = note d (As,  o)
+
+ass : Octave -> Dur -> Music Pitch
+ass o d = note d (Ass,  o)
+
+bff : Octave -> Dur -> Music Pitch
+bff o d = note d (Bff,  o)
+
+bf : Octave -> Dur -> Music Pitch
+bf o d = note d (Bf,  o)
+
+b : Octave -> Dur -> Music Pitch
+b o d = note d (B,  o)
+
+bs : Octave -> Dur -> Music Pitch
+bs o d = note d (Bs,  o)
+
+bss : Octave -> Dur -> Music Pitch
+bss o d = note d (Bss,  o)
 
 {- 2.4 Absolute Pitches -}
 
