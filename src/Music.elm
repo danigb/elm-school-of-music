@@ -73,8 +73,8 @@ type Control =
   | Transpose AbsPitch              -- transposition
   | Instrument InstrumentName       -- instrument label
   | Phrase (List PhraseAttribute)   -- phrase attributes
-  | Player PlayerName               -- player label
-  | KeySig PitchClass Mode          -- key signature and mode
+  | KeySig PitchClass Mode          -- key signature and mode 
+  | Custom String                   --  for user-specified controls
 
 type alias PlayerName  = String
 
@@ -82,6 +82,9 @@ type Mode =
     Major 
   | Minor
 
+{- note: elm doesn't allow repetition of type constructors across separate types
+   because of ambiguity and so HSoM's Custom is renamed CustomInstrument.
+-}
 type InstrumentName =
      AcousticGrandPiano     | BrightAcousticPiano    | ElectricGrandPiano
   |  HonkyTonkPiano         | RhodesPiano            | ChorusedPiano
@@ -126,7 +129,7 @@ type InstrumentName =
   |  GuitarFretNoise        | BreathNoise            | Seashore
   |  BirdTweet              | TelephoneRing          | Helicopter
   |  Applause               | Gunshot                | Percussion
-  |  Custom String
+  |  CustomInstrument String
 
 type PhraseAttribute = 
     Dyn Dynamic
@@ -162,6 +165,25 @@ type NoteHead =
     DiamondHead | SquareHead | XHead | TriangleHead
   | TremoloHead | SlashHead | ArtHarmonic | NoHead
 
+type Volume = Int
+
+addVolume : Volume -> Music Pitch -> Music (Pitch,Volume)
+addVolume v = 
+  mMap (\p -> (p,v))
+
+type NoteAttribute = 
+    Volume Int          --  MIDI convention: 0=min, 127=max
+  | Fingering Int
+  | Dynamics String
+  | Params (List Float)  -- HSoM has Params (List Double) - need to nake a decision here
+
+type alias Note1 = 
+  (Pitch, List NoteAttribute)
+
+type alias Music1 = 
+  Music Note1
+
+
 {-- 2.3 Convenient Auxiliary Functions --}
 
 {-| note -}
@@ -193,11 +215,6 @@ instrument i m  =
 phrase : List PhraseAttribute -> Music a -> Music a
 phrase pa m = 
   Modify (Phrase pa) m
-
-{-| player -}
-player : PlayerName -> Music a -> Music a
-player pn m = 
-  Modify (Player pn) m
 
 {-| key signaure -}
 keysig : PitchClass -> Mode -> Music a -> Music a
@@ -412,3 +429,18 @@ pcToInt pc  = case pc of
   B  -> 11
   Bs  -> 12
   Bss  -> 13
+
+pMap : (a -> b) -> Primitive a -> Primitive b
+pMap f p =
+  case p of 
+   Note d x -> Note d (f x)
+   Rest d -> Rest d
+
+
+mMap : (a -> b) -> Music a -> Music b
+mMap f m =
+  case m of
+    Prim p -> Prim (pMap f p)
+    Seq m1 m2 -> Seq (mMap f m1) (mMap f m2)
+    Par m1 m2 -> Par (mMap f m1) (mMap f m2)
+    Modify c m -> Modify c (mMap f m)
