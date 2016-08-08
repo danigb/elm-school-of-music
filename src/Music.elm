@@ -1,6 +1,7 @@
 module Music exposing (
-  PitchClass(..), Primitive(..), Music(..), Control(..), Octave, Pitch, AbsPitch,
-  note, rest, tempo,
+  PitchClass(..), Primitive(..), Music(..), Control(..), Octave, Pitch, AbsPitch, 
+  Dur, InstrumentName (..),
+  note, iNote, rest, iRest, tempo,
   absPitch, pitch, trans,
   wts )
 
@@ -15,11 +16,11 @@ Octave, PitchClass, Pitch, Dur
 
 # 2.2 Notes, Music, and Polymorphism
 
-@docs PitchClass, Primitive, Music, Control, Octave, Pitch, AbsPitch
+@docs PitchClass, Primitive, Music, Control, Octave, Pitch, AbsPitch, Dur, InstrumentName
 
 # 2.3 Convenient Auxiliary Functions
 
-@docs note, rest, tempo
+@docs note, iNote, rest, iRest, tempo
 
 # 2.4 Absolute Pitches
 
@@ -48,6 +49,7 @@ type PitchClass =
 {-| Pitch -}
 type alias Pitch = (PitchClass, Octave)
 
+{-| Note duration -}
 type alias Dur = Rational
 
 qn : Dur
@@ -85,6 +87,7 @@ type Mode =
 {- note: elm doesn't allow repetition of type constructors across separate types
    because of ambiguity and so HSoM's Custom is renamed CustomInstrument.
 -}
+{-| Instrument Name -}
 type InstrumentName =
      AcousticGrandPiano     | BrightAcousticPiano    | ElectricGrandPiano
   |  HonkyTonkPiano         | RhodesPiano            | ChorusedPiano
@@ -186,15 +189,30 @@ type alias Music1 =
 
 {-- 2.3 Convenient Auxiliary Functions --}
 
-{-| note -}
+{- There is no ad hoc polymorphism im elm because it has no typeclasses.
+   It is evident in the note and rest counstructors which give a type error if supplied with an integer duration.
+   We need to work round this somehow.  Current plan is to introduce iNote and iRest.
+-}
+
+{-| note (fractional/rational duration) -}
 note : Dur -> a -> Music a
 note d p =
   Prim (Note d p)
 
-{-| rest -}
+{-| note (integral duration) -}
+iNote : Int -> a -> Music a
+iNote i p =
+  note (fromInt i) p
+
+{-| rest (fractional/rational duration) -}
 rest : Dur -> Music a
 rest d =
   Prim (Rest d)
+
+{-| rest (integral duration) -}
+iRest : Int -> Music a
+iRest i =
+  rest (fromInt i)
 
 {-| tempo -}
 tempo : Dur -> Music a -> Music a

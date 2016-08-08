@@ -2,6 +2,7 @@ module Checks exposing (..)
 
 import Music.Producers exposing (..)
 import Music exposing (..)
+import MoreMusic exposing (..)
 import Check exposing (..)
 import Check.Producer exposing (..)
 import Check.Test
@@ -31,7 +32,7 @@ claim_pitch_inverse_of_abspitch =
   `is`
     (enharmonicEquivalence)
   `for`
-    pitches
+    apitch
 
 claim_transposition_is_invertible =
   claim
@@ -53,12 +54,23 @@ claim_transposition_composes =
   `for`
     pitchWithTwoIntervals
 
+claim_retro_is_invertible =
+  claim
+    "a line of music reversed twice yields the original"
+  `that`
+    (\line -> (retro >> retro) line)
+  `is`
+    (identity)
+  `for`
+    musicPitchLine
+
 suite_music =
   suite "Music Suite"
     [ claim_abspitch_inverse_of_pitch
     , claim_pitch_inverse_of_abspitch
     , claim_transposition_is_invertible
     , claim_transposition_composes
+    , claim_retro_is_invertible 
     ]
 
 evidence : Evidence
