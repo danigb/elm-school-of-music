@@ -80,22 +80,11 @@ arest =
   dur
     |> Check.Producer.map (\d -> Prim (Rest d))
 
-{- a sequential production of music (line) -}
-seq : Producer (Music Pitch)
-seq =
-  let
-    {- this crashes because of the recursion in music - we need some laziness somehow : 
-       pair = Check.Producer.tuple (music, music) 
-    -}
-    pair = Check.Producer.tuple (pitchedNote, pitchedNote)
-  in
-    pair
-      |> Check.Producer.map (\(a,b) -> Seq a b)
-
-
-{-| a parallel production of music (chord) -}
-par : Producer (Music Pitch)
-par =
+{- a sequential or parallel production of music 
+   we need to make this lazy
+-}
+parseq : (Music Pitch -> Music Pitch -> Music Pitch) -> Producer (Music Pitch)
+parseq constructor =
   let
     {- this crashes because of the recursion in music : 
        pair = Check.Producer.tuple (music, music) 
@@ -103,9 +92,10 @@ par =
     pair = Check.Producer.tuple (pitchedNote, pitchedNote)
   in
     pair
-      |> Check.Producer.map (\(a,b) -> Par a b)
+      |> Check.Producer.map (\(a,b) -> constructor a b)
 
-{-| music - NOT COMPLETE -}
+
+{-| music - NOT COMPLETE - Modify ignored at the moment -}
 music : Producer (Music Pitch) 
 music =
   let
@@ -113,15 +103,15 @@ music =
       choices
         [ pitchedNote.generator
         , arest.generator
-        , seq.generator
-        , par.generator
+        , (parseq Seq).generator
+        , (parseq Par).generator
         ]
     shrinker pr =
       case pr of
         Prim (Note _ _) ->  pitchedNote.shrinker pr
-        Prim (Rest _) -> arest.shrinker pr
-        Seq _ _ -> seq.shrinker pr
-        Par _ _ -> par.shrinker pr
+        Seq _ _ -> (parseq Seq).shrinker pr
+        Par _ _ -> (parseq Par).shrinker pr
+        -- Prim (Rest _) -> arest.shrinker pr
         _ -> arest.shrinker pr
   in
     Producer generator shrinker 
