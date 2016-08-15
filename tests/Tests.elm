@@ -1,46 +1,122 @@
-import ElmTest exposing (..)
-import Music exposing (..)
+module Tests exposing (..)
+
+import Test exposing (..)
+import Fuzz exposing (intRange)
+import Fuzzers exposing (..)
+import Expect
 import String
 
-
+import Music exposing (..)
+import MoreMusic exposing (..)
 import Ratio exposing (Rational, over, fromInt)
 
+enharmonicEquivalence : Pitch -> AbsPitch 
+enharmonicEquivalence =
+  absPitch
 
 
-tests : Test
-tests =
-    suite "A Test Suite"
-        [
-            test "Addition" (assertEqual (3 + 7) 10),
-            test "String.left" (assertEqual "a" (String.left 1 "abcdefg")),
-            test "This test should pass" (assert True)
-        ]
+
+all : Test
+all =
+    concat
+      [  
+        music
+      , musicChecks
+      , moreMusicChecks
+      ]
 
 music : Test
 music =
-  suite "Music"
+  describe "Music basic tests"
     [
-      test "Rest" (assertEqual (Rest (fromInt 3)) (Rest (fromInt 3)) ),
-      test "Note" (assertEqual (Note (fromInt 3) (C, 4)) (Note (fromInt 3) (C, 4))),
-      test "Prim Rest" (assertEqual (Prim (Rest (3 `over` 4)))
-        (Prim (Rest (3 `over` 4)))),
-      test "Prim Note" (assertEqual (Prim (Note (fromInt 4) (C, 5)))
-        (Prim (Note (fromInt 4) (C, 5)))),
-      test "note" (assertEqual (note (fromInt 3) C) (Prim (Note (fromInt 3) C))),
-      test "rest" (assertEqual (rest (fromInt 1)) (Prim (Rest (fromInt 1)))),
-      test "tempo" (assertEqual (tempo (fromInt 4) (note (fromInt 3) C))
-        (Modify (Tempo (fromInt 4)) (Prim (Note (fromInt 3) C)))),
-      test "absPitch" (assertEqual 48 (absPitch (C, 4))),
-      test "abs pitches" (assertEqual [48,50,52,53,55]
-        (List.map absPitch [(C, 4), (D, 4), (E, 4), (F, 4), (G, 4)])),
-      test "pitch" (assertEqual (Cs, 4) (pitch 49)),
-      test "pitch 0 is C0" (assertEqual (C, 0) (pitch 0)),
-      test "negative pitch" (assertEqual (As, -1) (pitch -2)),
-      test "trans" (assertEqual (F, 4) (trans 5 (C, 4))),
-      test "whole tone scale" (assertEqual 
-        [Prim (Note (1 `over` 4) (A,4)),Prim (Note (1 `over` 4) (B,4)),Prim (Note (1 `over` 4) (Cs,5)),
-         Prim (Note (1 `over` 4) (Ds,5)),Prim (Note (1 `over` 4) (F,5))]  (wts (A, 4)) )
+      test "Rest" <|
+         \() ->
+           Expect.equal (Rest (fromInt 3)) (Rest (fromInt 3)),
+      test "Note" <|
+         \() ->
+           Expect.equal (Note (fromInt 3) (C, 4)) (Note (fromInt 3) (C, 4)),
+      test "Prim Rest" <|
+         \() ->
+           Expect.equal (Prim (Rest (3 `over` 4))) (Prim (Rest (3 `over` 4))),
+      test "Prim Note" <|
+         \() ->
+           Expect.equal (Prim (Note (fromInt 4) (C, 5))) (Prim (Note (fromInt 4) (C, 5))),
+      test "note" <|
+         \() ->
+           Expect.equal (note (fromInt 3) C) (Prim (Note (fromInt 3) C)),
+      test "rest" <|
+         \() ->         
+           Expect.equal (rest (fromInt 1)) (Prim (Rest (fromInt 1))),
+      test "tempo" <|
+         \() ->         
+           Expect.equal (tempo (fromInt 4) (note (fromInt 3) C)) (Modify (Tempo (fromInt 4)) (Prim (Note (fromInt 3) C))),
+      test "absPitch" <|
+         \() ->         
+           Expect.equal 48 (absPitch (C, 4)),
+      test "abs pitches" <|
+         \() ->         
+           Expect.equal [48,50,52,53,55]
+                        (List.map absPitch [(C, 4), (D, 4), (E, 4), (F, 4), (G, 4)]),
+      test "pitch" <|
+         \() ->         
+           Expect.equal (Cs, 4) (pitch 49),
+      test "pitch 0 is C0" <|
+         \() ->         
+           Expect.equal (C, 0) (pitch 0),
+      test "negative pitch" <|
+         \() ->         
+           Expect.equal (As, -1) (pitch -2),
+      test "trans" <|
+         \() ->         
+           Expect.equal (F, 4) (trans 5 (C, 4)),
+      test "whole tone scale" <|
+         \() ->         
+           Expect.equal 
+             [Prim (Note (1 `over` 4) (A,4)),Prim (Note (1 `over` 4) (B,4)),Prim (Note (1 `over` 4) (Cs,5)),
+              Prim (Note (1 `over` 4) (Ds,5)),Prim (Note (1 `over` 4) (F,5))]  (wts (A, 4)) 
     ]
 
-main =
-    runSuite music
+musicChecks : Test
+musicChecks =
+  describe "Music fuzzy checks"
+    [
+      fuzz (intRange 0 255) "absolute pitch of pitch" <|
+        \i ->
+           i
+             |> pitch
+             |> absPitch
+             |> Expect.equal i,
+      fuzz (apitch) "pitch of absolute pitch" <|
+        \p ->
+           p
+             |> absPitch
+             |> pitch
+             |> Expect.equal (pitch (enharmonicEquivalence p)),
+      fuzz (pitchWithInterval) "transposition up and down" <|
+        \(p,i) ->
+          absPitch (trans -i (trans i p))
+            |> Expect.equal (enharmonicEquivalence p),
+      fuzz (pitchWithTwoIntervals) "transposition composes" <|
+        \(p,i,j) ->
+           absPitch (trans i (trans j p))
+            |> Expect.equal (absPitch (trans (i + j) p))
+    ]
+
+moreMusicChecks : Test
+moreMusicChecks =
+  describe "More Music fuzzy checks"
+    [
+
+      fuzz (musicPitchLine) "reverse music line twice" <|
+        \line ->
+          line 
+            |> (retro << retro)
+            |> Expect.equal line,
+      fuzz (Fuzzers.music 5) "inverted music duration" <|
+        \mus ->
+          mus 
+            |> invert
+            |> dur
+            |> Expect.equal (dur mus)
+    ]
+
