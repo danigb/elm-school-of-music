@@ -1,5 +1,5 @@
 elm-stuff/
-tmp/
+tests/elm-stuff/
 deprecated/
 index.html
 compmm.sh

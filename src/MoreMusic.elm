@@ -6,11 +6,12 @@ module MoreMusic exposing (
   , chord
   , offset
   , times
-  , invert
   , shiftPitches
   , scaleDurations
   , changeInstrument
   , retro
+  , invert
+  , dur
   )
 
 {- maps and folds etc for music
@@ -23,11 +24,12 @@ module MoreMusic exposing (
   , chord
   , offset
   , times
-  , invert
   , shiftPitches
   , scaleDurations
   , changeInstrument
   , retro
+  , invert
+  , dur
 
 
 -}
@@ -119,6 +121,7 @@ invertAt1 : Pitch -> Music (Pitch, a) -> Music (Pitch, a)
 invertAt1 pRef = 
   mMap (\(p,x) -> (pitch (2 * absPitch pRef - absPitch p),x))
 
+{-| invert a piece of Music (Pitch) -}
 invert : Music Pitch -> Music Pitch
 invert m = 
   let 
@@ -159,7 +162,7 @@ retro m =
           Par (Seq (rest (subtractDur d2 d1)) (retro m1)) (retro m2)
 
 
-
+{-| the duration of a piece of music -}
 dur : Music a -> Dur
 dur m =
   case m of
