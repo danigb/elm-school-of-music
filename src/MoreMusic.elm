@@ -7,6 +7,7 @@ module MoreMusic exposing (
   , offset
   , times
   , shiftPitches
+  , shiftPitches1
   , scaleDurations
   , changeInstrument
   , retro
@@ -15,6 +16,7 @@ module MoreMusic exposing (
   )
 
 {- maps and folds etc for music
+
 
 @docs 
     pMap
@@ -25,6 +27,7 @@ module MoreMusic exposing (
   , offset
   , times
   , shiftPitches
+  , shiftPitches1
   , scaleDurations
   , changeInstrument
   , retro
@@ -39,6 +42,10 @@ import Ratio exposing (Rational, over, fromInt, toFloat, add, divide, negate)
 import Lazy exposing (lazy, force, Lazy)
 import Prelude exposing (..)
 import Music exposing (..)
+
+
+
+
 
 {-| functor behaviour for primitives -}
 pMap : (a -> b) -> Primitive a -> Primitive b
@@ -197,9 +204,15 @@ subtractDur a b =
    rather than wrapping it with Modify. The following functions allow this.
 -}
 
+{-|-}
 shiftPitches : AbsPitch -> Music Pitch -> Music Pitch
 shiftPitches k = 
   mMap (trans k)
+
+{-| shift piches of Music defined with more than just pitch -}
+shiftPitches1 : AbsPitch -> Music (Pitch, b) -> Music (Pitch, b)
+shiftPitches1 k = 
+  mMap (\(p,xs) -> (trans k p, xs))
 
 scaleDurations : Rational -> Music a -> Music a
 scaleDurations r m =

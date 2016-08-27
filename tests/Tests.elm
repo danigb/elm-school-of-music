@@ -8,6 +8,7 @@ import String
 
 import Music exposing (..)
 import MoreMusic exposing (..)
+import MEvent exposing (..)
 import Ratio exposing (Rational, over, fromInt)
 
 enharmonicEquivalence : Pitch -> AbsPitch 

@@ -5,13 +5,13 @@
     "license": "BSD-3-Clause",
     "source-directories": [
         ".",
-        "../src"
+        "../src",
+        "../src/ratio"
     ],
     "exposed-modules": [],
     "dependencies": {
         "elm-lang/core": "4.0.0 <= v < 5.0.0",
         "elm-lang/lazy" : "1.0.0 <= v < 2.0.0",
-        "imeckler/ratio": "2.0.1 <= v < 3.0.0",
         "elm-community/elm-test": "2.0.0 <= v < 3.0.0",
         "rtfeldman/node-test-runner": "1.0.0 <= v < 2.0.0"
     },

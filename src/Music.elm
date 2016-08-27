@@ -1,7 +1,7 @@
 module Music exposing (
-  PitchClass(..), Primitive(..), Music(..), Control(..), Octave, Pitch, AbsPitch, 
-  Dur, InstrumentName (..),
-  note, iNote, rest, iRest, tempo,
+  PitchClass(..), Primitive(..), Music(..), Control(..), PlayerName, Octave, Pitch, AbsPitch, 
+  Dur, InstrumentName (..), Volume, Mode (..), NoteAttribute (..), PhraseAttribute, Music1, Note1,
+  note, iNote, rest, iRest, tempo, qn,
   absPitch, pitch, trans,
   wts )
 
@@ -16,11 +16,11 @@ Octave, PitchClass, Pitch, Dur
 
 # 2.2 Notes, Music, and Polymorphism
 
-@docs PitchClass, Primitive, Music, Control, Octave, Pitch, AbsPitch, Dur, InstrumentName
+@docs PitchClass, Primitive, Music, Control, PlayerName, Octave, Pitch, AbsPitch, Dur, InstrumentName, Volume, Mode, NoteAttribute, PhraseAttribute, Music1, Note1 
 
 # 2.3 Convenient Auxiliary Functions
 
-@docs note, iNote, rest, iRest, tempo
+@docs note, iNote, rest, iRest, tempo, qn
 
 # 2.4 Absolute Pitches
 
@@ -52,6 +52,7 @@ type alias Pitch = (PitchClass, Octave)
 {-| Note duration -}
 type alias Dur = Rational
 
+{-| quarter note -}
 qn : Dur
 qn = over 1 4
 
@@ -78,8 +79,10 @@ type Control =
   | KeySig PitchClass Mode          -- key signature and mode 
   | Custom String                   --  for user-specified controls
 
+{-| The name of the 'player' of the music -}
 type alias PlayerName  = String
 
+{-| Mode -}
 type Mode = 
     Major 
   | Minor
@@ -134,6 +137,7 @@ type InstrumentName =
   |  Applause               | Gunshot                | Percussion
   |  CustomInstrument String
 
+{-| Phrase Attribute - dynamics, articulation etc. -}
 type PhraseAttribute = 
     Dyn Dynamic
   | Tmp Tempo
@@ -168,21 +172,25 @@ type NoteHead =
     DiamondHead | SquareHead | XHead | TriangleHead
   | TremoloHead | SlashHead | ArtHarmonic | NoHead
 
-type Volume = Int
+{-|-}
+type alias Volume = Int
 
 addVolume : Volume -> Music Pitch -> Music (Pitch,Volume)
 addVolume v = 
   mMap (\p -> (p,v))
 
+{-|-}
 type NoteAttribute = 
     Volume Int          --  MIDI convention: 0=min, 127=max
   | Fingering Int
   | Dynamics String
   | Params (List Float)  -- HSoM has Params (List Double) - need to nake a decision here
 
+{-| the basic Note -}
 type alias Note1 = 
   (Pitch, List NoteAttribute)
 
+{-| Music composed od Note1s -}
 type alias Music1 = 
   Music Note1
 
