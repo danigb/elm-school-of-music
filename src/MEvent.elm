@@ -6,7 +6,7 @@ module MEvent exposing (..)
 -}
 
 import Maybe exposing (withDefault)
-import Ratio exposing (Rational, over, fromInt, divide)
+import Ratio exposing (Rational, over, fromInt, divide, toFloat, negate)
 import Ratio.Infix exposing (..)
 import Music exposing (..)
 import MoreMusic exposing (..)
@@ -27,14 +27,22 @@ type alias Performance = List MEvent
 type alias PTime = Rational
 type alias DurT = Rational
 
-
-
 type alias MContext  = 
    { mcTime    : PTime
    , mcInst    : InstrumentName
    , mcDur     : DurT
    , mcVol     : Volume
    }
+
+nullEvent : MEvent 
+nullEvent =
+  { eTime   = over 0 1
+  , eInst   = AcousticGrandPiano
+  , ePitch  = 0
+  , eDur    = over 0 1
+  , eVol    = 0
+  , eParams = []
+  }
 
 
 merge : Performance -> Performance -> Performance
@@ -59,15 +67,22 @@ merge es1 es2 =
            h2 :: merge es1 tailEs2
 
 {-
+toMusic1 is a polymorphic function in the Haskell implemented using
+type classes (which don't exist in Elm).  We need an unintrusive way
+of somehow emulating this.
+
+Bottom line is perhaps just to have a bunch of functions with slightly different names
+or one function with an extra parameter that disambiguates the types.  Both sordid.
+
+
 perform : Music a -> Performance
 perform = 
-  perform1 . toMusic1
+  perform1 << toMusic1
+-}
 
 perform1 : Music1 -> Performance
 perform1 = 
-  fst . perform1Dur
--}
-
+  fst << perform1Dur
 
 perform1Dur : Music1 -> (Performance, DurT)
 perform1Dur m = 
@@ -136,6 +151,9 @@ noteToMEvent c d (p, nas) =
    in  
      List.foldr nasFun e0 nas
 
+{-| This function took almost a whole day to port from Haskell to Elm
+    There may well be errors....
+-}
 phraseToMEvents : MContext -> List PhraseAttribute -> Music1 -> (Performance, DurT)
 phraseToMEvents c pAtts m =
   let
@@ -144,33 +162,88 @@ phraseToMEvents c pAtts m =
     dt = .mcDur c
   in case pAtts of
     pa :: pas ->
-      -- this case not finished!!
-      musicToMEvents c m
+      let
+        (pf,dur) =  -- as pfd!! 
+           phraseToMEvents c pas m
+        loud x =  
+           phraseToMEvents c (Dyn (Loudness (fromInt x)) :: pas) m
+        stretch x =  
+           let  
+             t0 = .eTime (List.head pf 
+                           |> withDefault nullEvent)  
+             r  = x |/| dur
+             -- e = {eTime = t, eDur = d}
+             upd : MEvent -> MEvent
+             upd e = 
+               let  dt  = t |-| t0
+                    t'  = (1 +| dt |*| r) |*| dt |+| t0
+                    d = e.eDur 
+                    d'  = (1 +| (2 *| dt |+| d) |*| r) |*| d
+               in 
+                 {e | eTime = t', eDur = d'}
+           in 
+             (List.map upd pf, (1 +| x) |*| dur)
+        inflate x =  
+           let  
+             t0  = .eTime (List.head pf
+                           |> withDefault nullEvent)   
+             r   = x |/| dur
+             -- e   = {eTime = t, eVol = v}
+             upd : MEvent -> MEvent
+             upd e = 
+               let
+                 t = e.eTime 
+                 v = e.eVol
+                 eVol = ( (1 +| (t |-| t0) |*| r) |* v)
+                          |> Ratio.round
+               in
+                 {e | eVol = eVol}
+           in 
+             (List.map upd pf, dur)
+       in
+         case pa of
+           Dyn (Accent x) ->
+             ( List.map (\e-> {e | eVol = Ratio.round (x |* e.eVol )}) pf, dur)
+           Dyn (StdLoudness l) -> 
+             case l of 
+               PPP -> loud 40
+               PP  -> loud 50
+               P   -> loud 60
+               MP  -> loud 70
+               SF  -> loud 80
+               MF  -> loud 90
+               NF  -> loud 100
+               FF  -> loud 110
+               FFF -> loud 120
+           Dyn (Loudness x) ->  
+             phraseToMEvents {c | mcVol = Ratio.round x} pas m
+           Dyn (Crescendo x) ->  
+             inflate x 
+           Dyn (Diminuendo x) -> 
+             inflate (Ratio.negate x)
+           Tmp (Ritardando x) ->  
+             stretch x 
+           Tmp (Accelerando x) -> 
+             stretch (Ratio.negate x)
+           Art (Staccato x) ->  
+             ( List.map (\e-> {e | eDur = x |*| e.eDur}) pf, dur)
+           Art (Legato x) ->  
+             ( List.map (\e-> {e | eDur = x |*| e.eDur}) pf, dur)
+           Art (Slurred x) -> 
+             let  
+               lastStartTime = 
+                 List.foldr (\e t -> Ratio.max (e.eTime) t) (over 0 1) pf
+               setDur e  =   
+                 if e.eTime |<| lastStartTime then 
+                   {e | eDur = x |*| e.eDur}
+                 else 
+                   e
+             in (List.map setDur pf, dur) 
+           Art _ -> 
+             (pf,dur) -- not supported
+           Orn _ -> 
+             (pf,dur) -- not supported
     _ -> 
       musicToMEvents c m
-
-{-
-> phraseToMEvents c [] m = musicToMEvents c m
-> phraseToMEvents c@MContext{mcTime=t, mcInst=i, mcDur=dt} (pa:pas) m =
->  let  pfd@(pf,dur)  =  phraseToMEvents c pas m
->       loud x        =  phraseToMEvents c (Dyn (Loudness x) : pas) m
->       stretch x     =  let  t0 = eTime (head pf);  r  = x/dur
->                             upd (e@MEvent {eTime = t, eDur = d}) = 
->                               let  dt  = t-t0
->                                    t'  = (1+dt*r)*dt + t0
->                                    d'  = (1+(2*dt+d)*r)*d
->                               in e {eTime = t', eDur = d'}
->                        in (map upd pf, (1+x)*dur)
->       inflate x     =  let  t0  = eTime (head pf);  
->                             r   = x/dur
->                             upd (e@MEvent {eTime = t, eVol = v}) = 
->                                 e {eVol =  round ( (1+(t-t0)*r) * 
->                                            fromIntegral v)}
->                        in (map upd pf, dur)
--}
-
-
-
-
 
 

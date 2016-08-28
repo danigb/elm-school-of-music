@@ -1,6 +1,7 @@
 module Music exposing (
   PitchClass(..), Primitive(..), Music(..), Control(..), PlayerName, Octave, Pitch, AbsPitch, 
-  Dur, InstrumentName (..), Volume, Mode (..), NoteAttribute (..), PhraseAttribute, Music1, Note1,
+  Dur, InstrumentName (..), Volume, Mode (..), NoteAttribute (..), PhraseAttribute (..), Music1, Note1,
+  Dynamic (..),StdLoudness (..), Articulation (..), Tempo (..),
   note, iNote, rest, iRest, tempo, qn,
   absPitch, pitch, trans,
   wts )
@@ -16,7 +17,8 @@ Octave, PitchClass, Pitch, Dur
 
 # 2.2 Notes, Music, and Polymorphism
 
-@docs PitchClass, Primitive, Music, Control, PlayerName, Octave, Pitch, AbsPitch, Dur, InstrumentName, Volume, Mode, NoteAttribute, PhraseAttribute, Music1, Note1 
+@docs PitchClass, Primitive, Music, Control, PlayerName, Octave, Pitch, AbsPitch, Dur, InstrumentName, Volume, Mode, NoteAttribute, PhraseAttribute, 
+      Music1, Note1, Dynamic, StdLoudness, Articulation, tempo,
 
 # 2.3 Convenient Auxiliary Functions
 
@@ -144,6 +146,7 @@ type PhraseAttribute =
   | Art Articulation
   | Orn Ornament
 
+{-|-}
 type Dynamic =  
     Accent Rational | Crescendo Rational | Diminuendo Rational
   | StdLoudness StdLoudness | Loudness Rational
@@ -151,10 +154,12 @@ type Dynamic =
 type StdLoudness = 
   PPP | PP | P | MP | SF | MF | NF | FF | FFF
 
+{-|-}
 type Tempo =
    Ritardando Rational 
  | Accelerando Rational
 
+{-|-}
 type Articulation =  
     Staccato Rational | Legato Rational | Slurred Rational
   | Tenuto | Marcato | Pedal | Fermata | FermataDown | Breath
