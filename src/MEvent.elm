@@ -10,6 +10,7 @@ import Ratio exposing (Rational, over, fromInt, divide, toFloat, negate)
 import Ratio.Infix exposing (..)
 import Music exposing (..)
 import MoreMusic exposing (..)
+import Music1 exposing (..)
 
 
 
@@ -68,7 +69,7 @@ merge es1 es2 =
 
 {-
 toMusic1 is a polymorphic function in the Haskell implemented using
-type classes (which don't exist in Elm).  We need an unintrusive way
+type classes (which don't exist in Elm).  We need an unobtrusive way
 of somehow emulating this.
 
 Bottom line is perhaps just to have a bunch of functions with slightly different names
@@ -83,6 +84,24 @@ perform =
 perform1 : Music1 -> Performance
 perform1 = 
   fst << perform1Dur
+
+-- other instances - I think that this is the best we can do, given that we are denied true abstractio
+performP : Music Pitch -> Performance
+performP = 
+   (makeMusic pMusicMaker) 
+      >> (fst << perform1Dur)
+
+performPV : Music (Pitch, Volume) -> Performance
+performPV = 
+   (makeMusic pvMusicMaker) 
+      >> (fst << perform1Dur)
+
+performAP : Music AbsPitch -> Performance
+performAP = 
+   (makeMusic apMusicMaker) 
+      >> (fst << perform1Dur)
+
+-- end of other instances
 
 perform1Dur : Music1 -> (Performance, DurT)
 perform1Dur m = 

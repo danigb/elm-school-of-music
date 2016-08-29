@@ -7,18 +7,34 @@ module Music exposing (
   wts )
 
 {-|
+
 My attempt to port HSoM to elm
 
 CHAPTER 2
 
-2.1 Preliminaries
 
-Octave, PitchClass, Pitch, Dur
+# 2.2 Types
 
-# 2.2 Notes, Music, and Polymorphism
-
-@docs PitchClass, Primitive, Music, Control, PlayerName, Octave, Pitch, AbsPitch, Dur, InstrumentName, Volume, Mode, NoteAttribute, PhraseAttribute, 
-      Music1, Note1, Dynamic, StdLoudness, Articulation, tempo,
+@docs PitchClass
+    , Primitive
+    , Music
+    , Control
+    , PlayerName
+    , Octave
+    , Pitch
+    , AbsPitch
+    , Dur
+    , InstrumentName
+    , Volume
+    , Mode
+    , NoteAttribute
+    , PhraseAttribute
+    , Music1
+    , Note1
+    , Dynamic
+    , StdLoudness
+    , Articulation
+    , Tempo
 
 # 2.3 Convenient Auxiliary Functions
 
@@ -50,6 +66,11 @@ type PitchClass =
 
 {-| Pitch -}
 type alias Pitch = (PitchClass, Octave)
+
+{- NOTE: I would prefer to use a Float -}
+
+{-| Absolute Pitch -}
+type alias AbsPitch = Int
 
 {-| Note duration -}
 type alias Dur = Rational
@@ -151,6 +172,7 @@ type Dynamic =
     Accent Rational | Crescendo Rational | Diminuendo Rational
   | StdLoudness StdLoudness | Loudness Rational
 
+{-|-}
 type StdLoudness = 
   PPP | PP | P | MP | SF | MF | NF | FF | FFF
 
@@ -173,6 +195,7 @@ type Ornament =
   | Instruction String | Head NoteHead
   | DiatonicTrans Int
 
+{-|-}
 type NoteHead =  
     DiamondHead | SquareHead | XHead | TriangleHead
   | TremoloHead | SlashHead | ArtHarmonic | NoHead
@@ -365,10 +388,7 @@ bss o d = note d (Bss,  o)
 {- Treating pitches simply as integers is useful in many settings, so Euterpea
 uses a type synonym to define the concept of an “absolute pitch: -}
 
-{- NOTE: I would prefer to use a Float -}
 
-{-| Absolute Pitch -}
-type alias AbsPitch = Int
 
 {-| The absolute pitch of a Pitch -}
 absPitch : Pitch -> AbsPitch

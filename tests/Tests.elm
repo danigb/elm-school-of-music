@@ -7,15 +7,24 @@ import Expect
 import String
 
 import Music exposing (..)
+import Music1 exposing (..)
 import MoreMusic exposing (..)
 import MEvent exposing (..)
-import Ratio exposing (Rational, over, fromInt)
+import Ratio exposing (Rational, over, fromInt, compare)
 
 enharmonicEquivalence : Pitch -> AbsPitch 
 enharmonicEquivalence =
   absPitch
 
-
+{- is this in any way equivalent to musEquiv from Euterpea??? -}
+musEquiv : Music Pitch -> Music Pitch -> Bool
+musEquiv m1 m2 = 
+    let
+      e1 = performP m1
+      e2 = performP m2
+      sortwith = \e1 e2 -> Ratio.compare e1.eTime e2.eTime
+    in
+      (List.sortWith sortwith e1) == (List.sortWith sortwith e2)
 
 all : Test
 all =
