@@ -5,6 +5,6 @@ An attempt to port [HSoM](http://www.cs.yale.edu/homes/hudak/Papers/HSoM.pdf) to
 __A work in progress. Very incomplete__
 
 
-To run the tests, install the latest version of the elm-test runner (currently 3.0.1), clone this repo and run:
+To run the tests, install the latest version of the elm-test runner, clone this repo and run:
 
     elm-test
