@@ -9,5 +9,5 @@ To run the tests, install the latest version of the elm-test runner (currently 3
 
     elm-test
     
-(The tests now use _elm-community/elm-test/3.0.0_ which deprecates elm-check. It replaces the old Producers with the new concept of Fuzzers.  All QickCheck-style checks can now be incorporated into a conventional elm-test suite)
+
 
